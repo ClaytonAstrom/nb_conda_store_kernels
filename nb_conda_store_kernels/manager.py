@@ -91,10 +91,17 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
                     "{connection_file}",
                 ],
                 language="python",
+                # resource_dir=os.path.join(
+                #     tempfile.gettempdir(),
+                #     "conda-store",
+                #     str(build),
+                # ),
                 resource_dir=os.path.join(
-                    tempfile.gettempdir(),
-                    "conda-store",
-                    str(build),
+                      os.path.expanduser("~"),
+                      "conda-store",
+                      namespace,
+                      name,
+                      str(build)
                 ),
                 metadata={},
             )
