@@ -1,5 +1,6 @@
 import tempfile
 import os
+import getpass
 
 from jupyter_client.kernelspec import KernelSpecManager, KernelSpec, NoSuchKernel
 from jupyter_client.utils import run_sync
@@ -74,7 +75,8 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
             build = environment["current_build_id"]
 
             store_path = os.path.join(
-                    os.path.expanduser("~"),
+                    "/home",
+                    getpass.getuser(),
                     "conda-store",
                     namespace,
                     name
