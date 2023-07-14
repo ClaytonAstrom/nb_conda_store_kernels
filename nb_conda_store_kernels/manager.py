@@ -73,6 +73,13 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
             name = environment["name"]
             build = environment["current_build_id"]
 
+            store_path = os.path.join(
+                    os.path.expanduser("~"),
+                    "conda-store",
+                    namespace,
+                    name
+            )
+
             display_name = self.name_format.format(
                 namespace=namespace, name=name, build=build
             )
@@ -81,6 +88,8 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
                 argv=[
                     "conda-store",
                     "run",
+                    "--install-dir",
+                    store_path,
                     str(build),
                     "--",
                     "python",
@@ -97,10 +106,7 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
                 #     str(build),
                 # ),
                 resource_dir=os.path.join(
-                      os.path.expanduser("~"),
-                      "conda-store",
-                      namespace,
-                      name,
+                      store_path,
                       str(build)
                 ),
                 metadata={},
