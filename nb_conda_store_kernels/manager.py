@@ -80,7 +80,7 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
                     "conda-store",
                     "run",
                     "--persistent-path",
-                    f"/opt/conda-store/{namespace}/{name}/{build}",
+                    f"/opt/conda-store/{namespace}/{name}/{str(build)}",
                     str(build),
                     "--",
                     "python",
@@ -91,8 +91,8 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
                     "{connection_file}",
                 ],
                 language="python",
-                resource_dir=os.path.join("/opt/conda-store", namespace, name, build)
-                if os.path.isfile(os.path.join("/opt/conda-store", namespace, name, build, "bin", "activate"))
+                resource_dir=os.path.join("/opt/conda-store", namespace, name, str(build))
+                if os.path.isfile(os.path.join("/opt/conda-store", namespace, name, str(build), "bin", "activate"))
                 else os.path.join(
                     tempfile.gettempdir(),
                     "conda-store",
