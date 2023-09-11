@@ -73,14 +73,14 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
             name = environment["name"]
             build = environment["current_build_id"]
 
-            display_name = self.name_format.format(
-                namespace=namespace, name=name, build=build
-            )
+            display_name = self.name_format.format(namespace=namespace, name=name, build=build)
             kernel_specs[f"conda-store://{namespace}/{name}:{build}"] = KernelSpec(
                 display_name=display_name,
                 argv=[
                     "conda-store",
                     "run",
+                    "--persistent-path",
+                    f"/opt/conda-store/{namespace}/{name}/{build}",
                     str(build),
                     "--",
                     "python",
@@ -91,7 +91,9 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
                     "{connection_file}",
                 ],
                 language="python",
-                resource_dir=os.path.join(
+                resource_dir=os.path.join("/opt/conda-store", namespace, name, build)
+                if os.path.isfile(os.path.join("/opt/conda-store", namespace, name, build, "bin", "activate"))
+                else os.path.join(
                     tempfile.gettempdir(),
                     "conda-store",
                     str(build),
@@ -105,9 +107,7 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
             kernel_specs = {}
         else:
             kernel_specs = super().find_kernel_specs()
-        kernel_specs.update(
-            {name: spec.resource_dir for name, spec in self.kernel_specs.items()}
-        )
+        kernel_specs.update({name: spec.resource_dir for name, spec in self.kernel_specs.items()})
         return kernel_specs
 
     def get_kernel_spec(self, kernel_name):
