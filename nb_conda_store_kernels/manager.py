@@ -72,7 +72,7 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
             namespace = environment["namespace"]["name"]
             name = environment["name"]
             # build = environment["current_build_id"]
-            for build in environment["build_ids"]:
+            for build in environment["completed_build_ids"]:
 
                 display_name = self.name_format.format(namespace=namespace, name=name, build=build)
                 kernel_specs[f"conda-store://{namespace}/{name}:{build}"] = KernelSpec(
