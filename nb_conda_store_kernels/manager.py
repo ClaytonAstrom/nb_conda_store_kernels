@@ -71,35 +71,36 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
         for environment in environments:
             namespace = environment["namespace"]["name"]
             name = environment["name"]
-            build = environment["current_build_id"]
+            # build = environment["current_build_id"]
+            for build in environment["build_ids"]:
 
-            display_name = self.name_format.format(namespace=namespace, name=name, build=build)
-            kernel_specs[f"conda-store://{namespace}/{name}:{build}"] = KernelSpec(
-                display_name=display_name,
-                argv=[
-                    "conda-store",
-                    "run",
-                    "--persistent-path",
-                    f"/opt/conda-store/{namespace}/{name}/{str(build)}",
-                    str(build),
-                    "--",
-                    "python",
-                    "-m",
-                    "IPython",
-                    "kernel",
-                    "-f",
-                    "{connection_file}",
-                ],
-                language="python",
-                resource_dir=os.path.join("/opt/conda-store", namespace, name, str(build))
-                if os.path.isfile(os.path.join("/opt/conda-store", namespace, name, str(build), "bin", "activate"))
-                else os.path.join(
-                    tempfile.gettempdir(),
-                    "conda-store",
-                    str(build),
-                ),
-                metadata={},
-            )
+                display_name = self.name_format.format(namespace=namespace, name=name, build=build)
+                kernel_specs[f"conda-store://{namespace}/{name}:{build}"] = KernelSpec(
+                    display_name=display_name,
+                    argv=[
+                        "conda-store",
+                        "run",
+                        "--persistent-path",
+                        f"/opt/conda-store/{namespace}/{name}/{str(build)}",
+                        str(build),
+                        "--",
+                        "python",
+                        "-m",
+                        "IPython",
+                        "kernel",
+                        "-f",
+                        "{connection_file}",
+                    ],
+                    language="python",
+                    resource_dir=os.path.join("/opt/conda-store", namespace, name, str(build))
+                    if os.path.isfile(os.path.join("/opt/conda-store", namespace, name, str(build), "bin", "activate"))
+                    else os.path.join(
+                        tempfile.gettempdir(),
+                        "conda-store",
+                        str(build),
+                    ),
+                    metadata={},
+                )
         return kernel_specs
 
     def find_kernel_specs(self):

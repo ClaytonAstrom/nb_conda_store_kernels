@@ -3,6 +3,8 @@ channels:
   - conda-forge
 dependencies:
   - jupyterlab
-  - conda-store >=0.4.5
   - traitlets
   - jupyter_client
+  - pip
+  - pip:
+    - 'conda-store@git+https://github.com/ClaytonAstrom/conda-store.git@4.12-AL3-401#egg=subdir&subdirectory=conda-store'
