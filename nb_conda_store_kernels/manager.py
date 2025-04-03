@@ -48,14 +48,10 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
+        self._kernel_specs_cache = {}
         self.log.info("[nb_conda_store_kernels] enabled")
 
-    @property
-    def kernel_specs(self):
-        return run_sync(self._kernel_specs)()
-
-    async def _kernel_specs(self):
+    async def kernel_specs(self):
         async with api.CondaStoreAPI(
             conda_store_url=self.conda_store_url,
             auth_type=self.conda_store_auth,
@@ -96,29 +92,39 @@ class CondaStoreKernelSpecManager(KernelSpecManager):
                     "conda-store",
                     str(build),
                 ),
-                metadata={},
+                metadata={
+                    "debugger": True
+                },
             )
+        self._kernel_specs_cache = kernel_specs
         return kernel_specs
 
-    def find_kernel_specs(self):
+    async def find_kernel_specs(self):
         if self.conda_store_only:
             kernel_specs = {}
         else:
             kernel_specs = super().find_kernel_specs()
+        kernels = await self.kernel_specs()
         kernel_specs.update(
-            {name: spec.resource_dir for name, spec in self.kernel_specs.items()}
+            {name: spec.resource_dir for name, spec in kernels.items()}
         )
         return kernel_specs
 
     def get_kernel_spec(self, kernel_name):
-        result = self.kernel_specs.get(kernel_name)
-        if result is None and not self.conda_store_only:
-            result = super().get_kernel_spec(kernel_name)
+        result = self._kernel_specs_cache.get(kernel_name)
+        if result is None:
+            self.log.info("Running kernel_specs sync")
+            run_sync(self.kernel_specs)()
+            result = self._kernel_specs_cache.get(kernel_name)
+
+            if result is None and not self.conda_store_only:
+                result = super().get_kernel_spec(kernel_name)
         return result
 
-    def get_all_specs(self):
+    async def get_all_specs(self):
         result = {}
-        for name, resource_dir in self.find_kernel_specs().items():
+        kernels = await self.find_kernel_specs()
+        for name, resource_dir in kernels.items():
             try:
                 spec = self.get_kernel_spec(name)
                 result[name] = {"resource_dir": resource_dir, "spec": spec.to_dict()}
